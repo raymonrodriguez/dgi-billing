@@ -8,11 +8,14 @@ use Filament\Support\Contracts\HasLabel;
 
 enum EcfStatus: string implements HasLabel, HasIcon, HasColor
 {
+    case PENDIENTE = 'Pendiente';
+    case FIRMADO = 'Firmado';
+    case ENVIADO = 'Enviado';
     case ACEPTADO = 'Aceptado';
     case RECHAZADO = 'Rechazado';
     case ACEPTADO_CONDICIONAL = 'Aceptado Condicional';
     case EN_PROCESO = 'En Proceso';
-    case PENDIENTE = 'Pendiente';
+    case ERROR = 'Error';
 
     public function getLabel(): ?string
     {
@@ -23,10 +26,10 @@ enum EcfStatus: string implements HasLabel, HasIcon, HasColor
     {
         return match ($this) {
             self::ACEPTADO => 'heroicon-m-check-badge',
-            self::RECHAZADO => 'heroicon-m-x-circle',
+            self::RECHAZADO, self::ERROR => 'heroicon-m-x-circle',
             self::ACEPTADO_CONDICIONAL => 'heroicon-m-exclamation-circle',
-            self::EN_PROCESO => 'heroicon-m-arrow-path',
-            self::PENDIENTE => 'heroicon-m-clock',
+            self::EN_PROCESO, self::ENVIADO => 'heroicon-m-arrow-path',
+            self::PENDIENTE, self::FIRMADO => 'heroicon-m-clock',
         };
     }
 
@@ -34,9 +37,9 @@ enum EcfStatus: string implements HasLabel, HasIcon, HasColor
     {
         return match ($this) {
             self::ACEPTADO => 'success',
-            self::RECHAZADO => 'danger',
-            self::ACEPTADO_CONDICIONAL, self::EN_PROCESO => 'warning',
-            self::PENDIENTE => 'gray',
+            self::RECHAZADO, self::ERROR => 'danger',
+            self::ACEPTADO_CONDICIONAL, self::EN_PROCESO, self::ENVIADO => 'warning',
+            self::PENDIENTE, self::FIRMADO => 'gray',
         };
     }
 }

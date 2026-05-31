@@ -3,7 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\EcfAnnulment;
-use App\Services\DgiiAuthService;
+use App\Services\DGII\DgiiAuthService;
+use App\Enums\AnnulmentStatus;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -33,13 +34,13 @@ class SendCancellationJob implements ShouldQueue
 
         try {
             // 1. Obtener Token
-            $token = $authService->getToken($company->id);
+            $token = $authService->getToken();
 
             // 2. Recuperar certificado y clave
             $certContent = Storage::get($company->certificate);
             $certPassword = $company->cert_password;
 
-            // 3. Formatear array de datos según requerimiento
+            // 3. Formatear array de datos
             $data = [
                 'RNCEmisor' => $company->tax_id,
                 'CantidadeNCFAnulados' => (int) $annulment->quantity,
@@ -53,27 +54,27 @@ class SendCancellationJob implements ShouldQueue
                 'MotivoAnulacion' => $annulment->reason,
             ];
 
-            // 4. Renderizar y firmar el XML de anulación
+            // 4. Renderizar y firmar el XML
             $xmlFirmado = Dgii::renderCancellationRange($certContent, $certPassword, $data);
 
-            // 5. Guardar XML en disco
+            // 5. Guardar XML
             $fileName = "annulments/{$company->tax_id}/ANNUL_{$annulment->type}_{$annulment->id}.xml";
             Storage::put($fileName, $xmlFirmado);
             $xmlPath = Storage::path($fileName);
 
             // 6. Enviar a la DGII
-            $response = Dgii::sendCancellationRange($company->environment, $token, $xmlPath);
+            $response = Dgii::sendCancellationRange($company->environment->value, $token, $xmlPath);
 
             // 7. Actualizar estado
             $annulment->update([
-                'status' => 'Sent',
+                'status' => AnnulmentStatus::ENVIADO,
                 'xml_path' => $fileName,
                 'response' => $response,
             ]);
 
         } catch (\Exception $e) {
             $annulment->update([
-                'status' => 'Error',
+                'status' => AnnulmentStatus::ERROR,
                 'response' => ['error' => $e->getMessage()],
             ]);
             throw $e;

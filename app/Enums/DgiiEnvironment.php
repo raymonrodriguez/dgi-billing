@@ -38,4 +38,13 @@ enum DgiiEnvironment: string implements HasLabel, HasIcon, HasColor
             self::PRODUCTION => 'success',
         };
     }
+
+    public function url(): string
+    {
+        return match($this) {
+            self::TEST => 'https://ecf.dgii.gov.do/testecf/autenticacion',
+            self::CERTIFICATION => 'https://ecf.dgii.gov.do/certecf/autenticacion',
+            self::PRODUCTION => 'https://ecf.dgii.gov.do/ecf/autenticacion',
+        };
+    }
 }

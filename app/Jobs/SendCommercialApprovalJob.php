@@ -3,7 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\ReceivedEcf;
-use App\Services\DgiiAuthService;
+use App\Services\DGII\DgiiAuthService;
+use App\Enums\CommercialApprovalStatus;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -37,8 +38,8 @@ class SendCommercialApprovalJob implements ShouldQueue
         $company = $receivedEcf->company;
 
         try {
-            // 1. Obtener Token de la empresa
-            $token = $authService->getToken($company->id);
+            // 1. Obtener Token
+            $token = $authService->getToken();
 
             // 2. Recuperar certificado y clave
             $certContent = Storage::get($company->certificate);
@@ -55,22 +56,21 @@ class SendCommercialApprovalJob implements ShouldQueue
             // 4. Firmar digitalmente el XML
             $signedXml = Dgii::signXmlContent($certContent, $certPassword, $xmlContent);
 
-            // 5. Guardar el XML firmado en el Storage
+            // 5. Guardar el XML firmado
             $fileName = "responses/acecf/{$company->tax_id}/ACECF_{$receivedEcf->encf}_" . now()->timestamp . ".xml";
             Storage::put($fileName, $signedXml);
             $xmlPath = Storage::path($fileName);
 
-            // 6. Enviar a la DGII utilizando el método nativo del Facade
-            $response = Dgii::sendCommercialApproval($company->environment, $token, $xmlPath);
+            // 6. Enviar a la DGII
+            $response = Dgii::sendCommercialApproval($company->environment->value, $token, $xmlPath);
 
-            // 7. Actualizar estatus en la tabla received_ecfs
+            // 7. Actualizar estatus
             $receivedEcf->update([
-                'commercial_approval_status' => ($this->status === '1') ? 'Approved' : 'Rejected',
+                'commercial_approval_status' => ($this->status === '1') ? CommercialApprovalStatus::APROBADO : CommercialApprovalStatus::RECHAZADO,
                 'acecf_sent' => true,
             ]);
 
         } catch (\Exception $e) {
-            // Registrar error y reintentar si es necesario
             throw $e;
         }
     }

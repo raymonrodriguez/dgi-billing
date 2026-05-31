@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Ecfs\Tables;
 
 use App\Models\Ecf;
 use App\Enums\EcfStatus;
-use App\Services\DgiiEmissionService;
+use App\Services\DGII\DgiiEmissionService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -85,7 +85,7 @@ class EcfsTable
                     ->hidden(fn (Ecf $record) => $record->dgii_status === EcfStatus::ACEPTADO)
                     ->action(function (Ecf $record, DgiiEmissionService $service) {
                         try {
-                            $service->emit($record);
+                            $service->emit($record->id);
                             Notification::make()
                                 ->title('Emisión Iniciada')
                                 ->body('La factura se está firmando y enviando a la DGII.')

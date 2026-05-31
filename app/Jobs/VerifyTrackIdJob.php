@@ -3,7 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\Ecf;
-use App\Services\DgiiAuthService;
+use App\Services\DGII\DgiiAuthService;
+use App\Repositories\Contracts\EcfRepositoryInterface;
+use App\Enums\EcfStatus;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,53 +28,47 @@ class VerifyTrackIdJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(DgiiAuthService $authService): void
+    public function handle(DgiiAuthService $authService, EcfRepositoryInterface $ecfRepo): void
     {
         $this->ecf->load(['company', 'user']);
         $company = $this->ecf->company;
 
-        if (!$this->ecf->track_id || $this->ecf->dgii_status !== 'En Proceso') {
+        if (!$this->ecf->track_id || ($this->ecf->dgii_status !== EcfStatus::EN_PROCESO && $this->ecf->dgii_status !== EcfStatus::ENVIADO)) {
             return;
         }
 
         try {
-            // 1. Obtener Token válido
-            $token = $authService->getToken($company->id);
+            // 1. Obtener Token (El servicio ahora usa el repositorio interno)
+            // Nota: Para multi-tenancy asíncrono, podríamos necesitar pasar el ID al servicio
+            // Pero siguiendo el código provisto, el servicio busca la empresa activa.
+            $token = $authService->getToken();
 
             // 2. Consultar Estatus en la DGII
-            $response = Dgii::findInvoice($company->environment, $token, $this->ecf->track_id);
+            $response = Dgii::findInvoice($company->environment->value, $token, $this->ecf->track_id);
 
-            // 3. Analizar respuesta y actualizar estatus
+            // 3. Analizar respuesta y actualizar estatus vía Repositorio
             $rawStatus = $response['status'] ?? 'En Proceso';
             $mappedStatus = $this->mapDgiiStatus($rawStatus);
 
-            $this->ecf->update([
-                'dgii_status' => $mappedStatus,
-                'dgii_messages' => $response['messages'] ?? ($response['error'] ?? null),
-                'dgii_response' => array_merge($this->ecf->dgii_response ?? [], ['verification_detail' => $response]),
-            ]);
+            $ecfRepo->updateStatus($this->ecf, $mappedStatus);
+            $ecfRepo->saveDgiiResponse($this->ecf, $response);
 
             // 4. Enviar Notificación al Usuario
             if ($this->ecf->user) {
-                $statusLabel = $mappedStatus === 'Aceptado' ? 'Aceptada' : 'Rechazada';
-                $color = $mappedStatus === 'Aceptado' ? 'success' : 'danger';
+                $statusLabel = $mappedStatus === EcfStatus::ACEPTADO ? 'Aceptada' : 'Rechazada';
+                $color = $mappedStatus === EcfStatus::ACEPTADO ? 'success' : 'danger';
 
                 Notification::make()
                     ->title("Factura e-NCF {$statusLabel}")
-                    ->body("El comprobante {$this->ecf->encf} ha sido {$mappedStatus} por la DGII.")
-                    ->icon($mappedStatus === 'Aceptado' ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->body("El comprobante {$this->ecf->encf} ha sido {$mappedStatus->value} por la DGII.")
+                    ->icon($mappedStatus === EcfStatus::ACEPTADO ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->color($color)
                     ->sendToDatabase($this->ecf->user);
             }
 
             // 5. Regla Crítica: Si es Aceptado, generar PDF
-            if (in_array($mappedStatus, ['Aceptado', 'Aceptado Condicional'])) {
+            if (in_array($mappedStatus, [EcfStatus::ACEPTADO, EcfStatus::ACEPTADO_CONDICIONAL])) {
                 GenerateEcfPdfJob::dispatch($this->ecf->id);
-            }
-
-            // 6. Si es Rechazado, manejar lógica adicional
-            if ($mappedStatus === 'Rechazado') {
-                // TODO: Notificar vía Email o activar alerta en el panel
             }
 
         } catch (\Exception $e) {
@@ -81,15 +77,15 @@ class VerifyTrackIdJob implements ShouldQueue
     }
 
     /**
-     * Map DGII response status to internal database status.
+     * Map DGII response status to EcfStatus Enum.
      */
-    protected function mapDgiiStatus(string $status): string
+    protected function mapDgiiStatus(string $status): EcfStatus
     {
         return match (strtolower($status)) {
-            'aceptado' => 'Aceptado',
-            'rechazado' => 'Rechazado',
-            'aceptado condicional' => 'Aceptado Condicional',
-            default => 'En Proceso',
+            'aceptado' => EcfStatus::ACEPTADO,
+            'rechazado' => EcfStatus::RECHAZADO,
+            'aceptado condicional' => EcfStatus::ACEPTADO_CONDICIONAL,
+            default => EcfStatus::EN_PROCESO,
         };
     }
 }
