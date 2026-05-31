@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class EcfPayment extends Model
+class EcfPayment extends BaseModel
 {
     protected $fillable = [
         'ecf_id',

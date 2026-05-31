@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class EcfSequence extends Model
+class EcfSequence extends BaseModel
 {
     protected $fillable = [
         'company_id',

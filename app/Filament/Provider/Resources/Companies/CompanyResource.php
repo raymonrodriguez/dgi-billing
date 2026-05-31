@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\Companies;
+namespace App\Filament\Provider\Resources\Companies;
 
-use App\Filament\Resources\Companies\Pages\CreateCompany;
-use App\Filament\Resources\Companies\Pages\EditCompany;
-use App\Filament\Resources\Companies\Pages\ListCompanies;
-use App\Filament\Resources\Companies\Schemas\CompanyForm;
-use App\Filament\Resources\Companies\Tables\CompaniesTable;
+use App\Filament\Provider\Resources\Companies\Pages\CreateCompany;
+use App\Filament\Provider\Resources\Companies\Pages\EditCompany;
+use App\Filament\Provider\Resources\Companies\Pages\ListCompanies;
+use App\Filament\Provider\Resources\Companies\Schemas\CompanyForm;
+use App\Filament\Provider\Resources\Companies\Tables\CompaniesTable;
 use App\Models\Company;
 use BackedEnum;
 use UnitEnum;
@@ -20,9 +20,18 @@ class CompanyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Gestión';
+    protected static string|UnitEnum|null $navigationGroup = 'Super Admin';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationLabel = 'Empresas / Emisores';
+
+    protected static bool $shouldRegisterNavigation = true;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        // Solo tú (o los usuarios marcados como super admin) deberían ver este menú
+        // Por ahora lo habilitamos para que puedas gestionarlo
+        return true;
+    }
 
 
     public static function form(Schema $schema): Schema
@@ -38,7 +47,7 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\UsersRelationManager::class,
         ];
     }
 

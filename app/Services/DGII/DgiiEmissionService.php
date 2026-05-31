@@ -31,6 +31,29 @@ class DgiiEmissionService
         }
 
         try {
+            $company = $ecf->company;
+
+            // 0. Verificar validez de la secuencia (e-NCF)
+            // Extraer el número secuencial (omitir la letra 'E' y el tipo, ej: E310000000001 -> 1)
+            $sequenceNumber = (int) substr($ecf->encf, 3);
+
+            $sequence = \App\Models\EcfSequence::where('company_id', $company->id)
+                ->where('type', $ecf->type)
+                ->where('is_active', true)
+                ->first();
+
+            if (!$sequence) {
+                throw new Exception("No existe una secuencia activa configurada para el tipo de comprobante {$ecf->type}.");
+            }
+
+            if ($sequenceNumber < $sequence->start_range || $sequenceNumber > $sequence->end_range) {
+                throw new Exception("El e-NCF {$ecf->encf} está fuera del rango autorizado ({$sequence->start_range} - {$sequence->end_range}).");
+            }
+
+            if ($sequence->expiration_date && $sequence->expiration_date->isPast()) {
+                throw new Exception("El talonario de secuencias para el tipo {$ecf->type} ha expirado el {$sequence->expiration_date->format('d/m/Y')}.");
+            }
+
             // 1. Obtener Token de sesión vigente
             $token = $this->authService->getToken();
 
@@ -46,11 +69,11 @@ class DgiiEmissionService
             $rawXml = View::make($viewName, ['ecf' => $ecf])->render();
 
             // 3. Firmar el XML digitalmente
-            $company = $ecf->company;
             $certData = [
                 'path' => Storage::path($company->certificate),
                 'password' => $company->cert_password
             ];
+
 
             $signedXml = $this->signingService->signXml($rawXml, $certData['path'], $certData['password']);
 
@@ -84,7 +107,12 @@ class DgiiEmissionService
 
                 $this->ecfRepo->updateStatus($ecf, EcfStatus::ENVIADO, $trackId);
 
+                $ecf->logActivity('Emitida', "Factura enviada a la DGII con éxito. TrackID: {$trackId}", [
+                    'track_id' => $trackId
+                ]);
+
                 return [
+
                     'success' => true,
                     'trackId' => $trackId,
                     'message' => 'Comprobante recibido de forma conforme por la DGII.'
@@ -92,6 +120,9 @@ class DgiiEmissionService
             }
 
             $this->ecfRepo->updateStatus($ecf, EcfStatus::ERROR);
+            $ecf->logActivity('Error de Envío', "La DGII rechazó la factura o hubo un error de transporte.", [
+                'response' => $response->body()
+            ]);
             throw new Exception("La DGII rechazó la estructura o transporte: " . $response->body());
 
         } catch (Exception $e) {

@@ -21,23 +21,7 @@
             @endif
             <RazonSocialReceptor><![CDATA[{{ $ecf->contact->name }}]]></RazonSocialReceptor>
         </Receptor>
-        <Totales>
-            <MontoTotal>{{ number_format($ecf->total_amount, 2, '.', '') }}</MontoTotal>
-            <TotalITBIS>{{ number_format($ecf->total_tax, 2, '.', '') }}</TotalITBIS>
-            <TotalITBIS18>{{ number_format($ecf->total_tax, 2, '.', '') }}</TotalITBIS18>
-        </Totales>
+        @include("xml.invoices.partials.totals", ["ecf" => $ecf])
     </Encabezado>
-    <DetallesItems>
-        @foreach($ecf->items as $index => $item)
-        <Item>
-            <NumeroLinea>{{ $index + 1 }}</NumeroLinea>
-            <IndicadorFacturacion>{{ $item->billing_indicator->value }}</IndicadorFacturacion>
-            <NombreItem><![CDATA[{{ $item->description }}]]></NombreItem>
-            <CantidadItem>{{ number_format($item->quantity, 2, '.', '') }}</CantidadItem>
-            <PrecioUnitarioItem>{{ number_format($item->price, 2, '.', '') }}</PrecioUnitarioItem>
-            <DescuentoMonto>{{ number_format($item->discount, 2, '.', '') }}</DescuentoMonto>
-            <MontoItem>{{ number_format($item->subtotal, 2, '.', '') }}</MontoItem>
-        </Item>
-        @endforeach
-    </DetallesItems>
+    @include("xml.invoices.partials.items", ["items" => $ecf->items])
 </eCF>

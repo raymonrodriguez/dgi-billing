@@ -4,21 +4,22 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Company;
 use App\Repositories\Contracts\CompanyRepositoryInterface;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Storage;
 
 class CompanyRepository implements CompanyRepositoryInterface
 {
-    public function getActiveCompany(): ?Company
+    public function getCurrentTenant(): ?Company
     {
-        // Retorna la empresa emisora activa (configurable según multi-tenant o único emisor)
-        return Company::where('is_active', true)->first();
+        // En un SaaS, el "Emisor Activo" es el Tenant que tiene la sesión iniciada
+        return Filament::getTenant();
     }
 
     public function getCertificateData(Company $company): array
     {
         return [
             'path' => Storage::path($company->certificate),
-            'password' => $company->cert_password, // Ya está encriptado vía cast en el modelo
+            'password' => $company->cert_password,
             'rnc' => $company->tax_id
         ];
     }

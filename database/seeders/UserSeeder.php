@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('password'),
+                'is_provider' => true,
             ]
         );
     }

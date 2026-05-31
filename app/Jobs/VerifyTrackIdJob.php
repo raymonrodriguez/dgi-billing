@@ -10,6 +10,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use PlatinumPlace\LaravelDgii\Facades\Dgii;
@@ -31,6 +32,7 @@ class VerifyTrackIdJob implements ShouldQueue
 
     /**
      * Execute the job.
+     * @throws ConnectionException
      */
     public function handle(DgiiAuthService $authService, EcfRepositoryInterface $ecfRepo): void
     {
@@ -41,37 +43,32 @@ class VerifyTrackIdJob implements ShouldQueue
             return;
         }
 
-        try {
-            $token = $authService->getToken();
+        $token = $authService->getToken();
 
-            $response = Dgii::findInvoice($company->environment->value, $token, $this->ecf->track_id);
+        $response = Dgii::findInvoice($company->environment->value, $token, $this->ecf->track_id);
 
-            // 3. Analizar respuesta y actualizar estatus vía Repositorio
-            $rawStatus = $response['status'] ?? 'En Proceso';
-            $mappedStatus = $this->mapDgiiStatus($rawStatus);
+        // 3. Analizar respuesta y actualizar estatus vía Repositorio
+        $rawStatus = $response['status'] ?? 'En Proceso';
+        $mappedStatus = $this->mapDgiiStatus($rawStatus);
 
-            $ecfRepo->updateStatus($this->ecf, $mappedStatus);
-            $ecfRepo->saveDgiiResponse($this->ecf, $response);
+        $ecfRepo->updateStatus($this->ecf, $mappedStatus);
+        $ecfRepo->saveDgiiResponse($this->ecf, $response);
 
-            // 4. Enviar Notificación al Usuario
-            if ($this->ecf->user) {
-                $statusLabel = $mappedStatus === EcfStatus::ACEPTADO ? 'Aceptada' : 'Rechazada';
-                $color = $mappedStatus === EcfStatus::ACEPTADO ? 'success' : 'danger';
+        // 4. Enviar Notificación al Usuario
+        if ($this->ecf->user) {
+            $statusLabel = $mappedStatus === EcfStatus::ACEPTADO ? 'Aceptada' : 'Rechazada';
+            $color = $mappedStatus === EcfStatus::ACEPTADO ? 'success' : 'danger';
 
-                Notification::make()
-                    ->title("Factura e-NCF {$statusLabel}")
-                    ->body("El comprobante {$this->ecf->encf} ha sido {$mappedStatus->value} por la DGII.")
-                    ->icon($mappedStatus === EcfStatus::ACEPTADO ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
-                    ->color($color)
-                    ->sendToDatabase($this->ecf->user);
-            }
+            Notification::make()
+                ->title("Factura e-NCF {$statusLabel}")
+                ->body("El comprobante {$this->ecf->encf} ha sido {$mappedStatus->value} por la DGII.")
+                ->icon($mappedStatus === EcfStatus::ACEPTADO ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                ->color($color)
+                ->sendToDatabase($this->ecf->user);
+        }
 
-            if (in_array($mappedStatus, [EcfStatus::ACEPTADO, EcfStatus::ACEPTADO_CONDICIONAL], true)) {
-                GenerateEcfPdfJob::dispatch($this->ecf->id);
-            }
-
-        } catch (\Exception $e) {
-            throw $e;
+        if (in_array($mappedStatus, [EcfStatus::ACEPTADO, EcfStatus::ACEPTADO_CONDICIONAL], true)) {
+            GenerateEcfPdfJob::dispatch($this->ecf->id);
         }
     }
 

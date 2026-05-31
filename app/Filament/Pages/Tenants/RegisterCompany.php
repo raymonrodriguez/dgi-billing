@@ -3,9 +3,10 @@
 namespace App\Filament\Pages\Tenants;
 
 use App\Models\Company;
-use Filament\Forms\Components\TextInput;
+use App\Filament\Provider\Resources\Companies\Schemas\CompanyForm;
 use Filament\Schemas\Schema;
 use Filament\Pages\Tenancy\RegisterTenant;
+use Filament\Support\Enums\Width;
 
 class RegisterCompany extends RegisterTenant
 {
@@ -14,18 +15,14 @@ class RegisterCompany extends RegisterTenant
         return 'Registrar Empresa';
     }
 
+    public function getMaxContentWidth(): Width | string | null
+    {
+        return Width::Full;
+    }
+
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('company_name')
-                    ->label('Nombre de la Empresa')
-                    ->required(),
-                TextInput::make('tax_id')
-                    ->label('RNC')
-                    ->required()
-                    ->unique('companies', 'tax_id'),
-            ]);
+        return CompanyForm::configure($schema);
     }
 
     protected function handleRegistration(array $data): Company

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class EcfTax extends Model
+class EcfTax extends BaseModel
 {
     protected $fillable = [
         'ecf_id',

@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\EcfAnnulments;
 
-use App\Filament\Resources\EcfAnnulments\Pages\CreateEcfAnnulment;
-use App\Filament\Resources\EcfAnnulments\Pages\EditEcfAnnulment;
 use App\Filament\Resources\EcfAnnulments\Pages\ListEcfAnnulments;
 use App\Filament\Resources\EcfAnnulments\Schemas\EcfAnnulmentForm;
 use App\Filament\Resources\EcfAnnulments\Tables\EcfAnnulmentsTable;
@@ -44,8 +42,6 @@ class EcfAnnulmentResource extends Resource
     {
         return [
             'index' => ListEcfAnnulments::route('/'),
-            'create' => CreateEcfAnnulment::route('/create'),
-            'edit' => EditEcfAnnulment::route('/{record}/edit'),
         ];
     }
 }

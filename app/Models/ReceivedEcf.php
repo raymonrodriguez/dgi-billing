@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use App\Enums\CommercialApprovalStatus;
-use Illuminate\Database\Eloquent\Model;
 
-class ReceivedEcf extends Model
+class ReceivedEcf extends BaseModel
 {
     protected $fillable = [
         'company_id',

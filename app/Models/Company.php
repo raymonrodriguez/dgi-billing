@@ -5,14 +5,14 @@ namespace App\Models;
 use App\Enums\DgiiEnvironment;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
 
-class Company extends Model implements HasName
+class Company extends BaseModel implements HasName
 {
     use HasUuids;
     protected $fillable = [
         'company_name',
         'trade_name',
+        'logo',
         'tax_id',
         'environment',
         'certificate',

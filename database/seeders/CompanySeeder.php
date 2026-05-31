@@ -12,9 +12,9 @@ class CompanySeeder extends Seeder
     public function run(): void
     {
         $company = Company::create([
-            'company_name' => 'DGII Soluciones Tecnológicas S.R.L.',
-            'trade_name' => 'DGII Billing Pro',
-            'tax_id' => '131560341',
+            'company_name' => 'RS code capital tecnologies',
+            'trade_name' => 'RS Code SaaS',
+            'tax_id' => '000000000',
             'environment' => DgiiEnvironment::TEST,
             'is_active' => true,
         ]);

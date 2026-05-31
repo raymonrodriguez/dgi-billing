@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use App\Enums\AnnulmentStatus;
-use Illuminate\Database\Eloquent\Model;
 
-class EcfAnnulment extends Model
+class EcfAnnulment extends BaseModel
 {
     protected $fillable = [
         'company_id',

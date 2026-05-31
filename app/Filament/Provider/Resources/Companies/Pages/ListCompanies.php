@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Companies\Pages;
+namespace App\Filament\Provider\Resources\Companies\Pages;
 
-use App\Filament\Resources\Companies\CompanyResource;
+use App\Filament\Provider\Resources\Companies\CompanyResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 

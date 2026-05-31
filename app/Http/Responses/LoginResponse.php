@@ -16,7 +16,7 @@ class LoginResponse extends BaseLoginResponse
             // Si el usuario tiene al menos una empresa, redirigir a la primera
             if ($user->companies()->exists()) {
                 $firstCompany = $user->companies()->first();
-                return redirect()->route('filament.admin.pages.dashboard', ['tenant' => $firstCompany]);
+                return redirect()->route('filament.admin.pages.dashboard', ['tenant' => $firstCompany->id]);
             }
         }
 

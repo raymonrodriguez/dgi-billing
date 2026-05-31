@@ -2,10 +2,11 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Resources\Companies\Schemas\CompanyForm;
+use App\Filament\Provider\Resources\Companies\Schemas\CompanyForm;
 use Filament\Schemas\Schema;
 use Filament\Pages\Tenancy\EditTenantProfile;
 use Illuminate\Contracts\Support\Htmlable;
+use Filament\Support\Enums\Width;
 
 class CompanyProfile extends EditTenantProfile
 {
@@ -19,9 +20,14 @@ class CompanyProfile extends EditTenantProfile
         return 'Perfil de la Empresa';
     }
 
+    public function getMaxContentWidth(): Width | string | null
+    {
+        return Width::Full;
+    }
+
     public function form(Schema $schema): Schema
     {
-        // Reutilizamos el mismo formulario que ya habíamos diseñado y validado
+        // Reutilizamos el mismo formulario premium del panel de proveedor
         return CompanyForm::configure($schema);
     }
 }

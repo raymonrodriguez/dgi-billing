@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Contingency extends Model
+class Contingency extends BaseModel
 {
     protected $fillable = [
         'company_id',

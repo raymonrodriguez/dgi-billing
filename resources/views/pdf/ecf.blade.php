@@ -58,6 +58,11 @@
         <!-- ENCABEZADO -->
         <div class="header">
             <div class="company-header">
+                @if($company->logo)
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ public_path('storage/' . $company->logo) }}" alt="Logo" style="max-height: 60px; max-width: 200px;">
+                    </div>
+                @endif
                 <div style="font-size: 16px; font-weight: bold;">{{ $company->company_name }}</div>
                 @if($company->trade_name) <div style="font-style: italic;">{{ $company->trade_name }}</div> @endif
                 <div style="margin-top: 5px;">RNC: <span class="text-bold">{{ $company->tax_id }}</span></div>

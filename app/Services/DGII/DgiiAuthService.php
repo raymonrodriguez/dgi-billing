@@ -4,10 +4,8 @@ namespace App\Services\DGII;
 
 use App\Repositories\Contracts\CompanyRepositoryInterface;
 use App\Repositories\Contracts\DgiiTokenRepositoryInterface;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Exception;
-use RuntimeException;
 
 class DgiiAuthService
 {
@@ -18,24 +16,22 @@ class DgiiAuthService
     ) {
     }
 
-    /**
-     * @throws ConnectionException
-     * @throws Exception
-     */
     public function getToken(): string
     {
-        $company = $this->companyRepo->getActiveCompany();
+        // Obtener el Tenant actual (Emisor)
+        $company = $this->companyRepo->getCurrentTenant();
+
         if (!$company) {
-            throw new RuntimeException("No hay una empresa emisora configurada activa.");
+            throw new Exception("No hay un emisor activo en la sesión.");
         }
 
-        // 1. Validar si ya existe un token almacenado en base de datos
+        // 1. Validar si ya existe un token almacenado en base de datos para ESTE emisor
         $existingToken = $this->tokenRepo->getValidToken($company->tax_id);
         if ($existingToken) {
             return $existingToken;
         }
 
-        // Determinar ambiente (asumimos que la empresa lo tiene)
+        // Determinar ambiente del emisor (Pruebas, Cert o Prod)
         $environment = $company->environment;
 
         // 2. Solicitar semilla a la DGII
@@ -43,12 +39,12 @@ class DgiiAuthService
         $response = Http::get($semillaUrl);
 
         if (!$response->successful()) {
-            throw new Exception("Error obteniendo la semilla de autenticación desde la DGII.");
+            throw new Exception("Error obteniendo la semilla desde la DGII para el emisor {$company->tax_id}.");
         }
 
         $semillaXml = $response->body();
 
-        // 3. Firmar la semilla usando el servicio de firmado
+        // 3. Firmar la semilla usando el certificado del EMISOR
         $certData = $this->companyRepo->getCertificateData($company);
         $semillaFirmada = $this->signingService->signXml($semillaXml, $certData['path'], $certData['password']);
 
@@ -60,7 +56,7 @@ class DgiiAuthService
         ])->withBody($semillaFirmada, 'application/xml')->post($tokenUrl);
 
         if (!$tokenResponse->successful()) {
-            throw new Exception("Error al intercambiar la semilla firmada por el token de la DGII: " . $tokenResponse->body());
+            throw new Exception("Error al intercambiar la semilla por el token de la DGII: " . $tokenResponse->body());
         }
 
         $tokenData = $tokenResponse->json();
