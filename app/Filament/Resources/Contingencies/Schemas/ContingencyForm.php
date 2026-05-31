@@ -29,7 +29,7 @@ class ContingencyForm
                                 ->label('Fecha de Inicio')
                                 ->required()
                                 ->prefixIcon('heroicon-m-play-circle'),
-                            
+
                             DateTimePicker::make('end_date')
                                 ->label('Fecha de Finalización')
                                 ->prefixIcon('heroicon-m-stop-circle'),

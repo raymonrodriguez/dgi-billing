@@ -28,6 +28,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
 - **Project Specific Documentation:** Always refer to `docs/PROJECT_GUIDE.md` for team-specific conventions and architecture rules.
+- **XML Structure Documentation:** Refer to `docs/files.md` for detailed information on the purpose and structure of the various XML/Blade templates used for DGII communication.
 
 ## Verification Scripts
 

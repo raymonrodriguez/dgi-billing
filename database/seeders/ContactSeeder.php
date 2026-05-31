@@ -11,7 +11,9 @@ class ContactSeeder extends Seeder
     {
         $company = Company::first();
 
-        if (!$company) return;
+        if (!$company) {
+            return;
+        }
 
         $contacts = [
             [

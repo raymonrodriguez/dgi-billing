@@ -16,14 +16,18 @@ use PlatinumPlace\LaravelDgii\Facades\Dgii;
 
 class VerifyTrackIdJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
      */
     public function __construct(
         public Ecf $ecf
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -38,12 +42,8 @@ class VerifyTrackIdJob implements ShouldQueue
         }
 
         try {
-            // 1. Obtener Token (El servicio ahora usa el repositorio interno)
-            // Nota: Para multi-tenancy asíncrono, podríamos necesitar pasar el ID al servicio
-            // Pero siguiendo el código provisto, el servicio busca la empresa activa.
             $token = $authService->getToken();
 
-            // 2. Consultar Estatus en la DGII
             $response = Dgii::findInvoice($company->environment->value, $token, $this->ecf->track_id);
 
             // 3. Analizar respuesta y actualizar estatus vía Repositorio
@@ -66,8 +66,7 @@ class VerifyTrackIdJob implements ShouldQueue
                     ->sendToDatabase($this->ecf->user);
             }
 
-            // 5. Regla Crítica: Si es Aceptado, generar PDF
-            if (in_array($mappedStatus, [EcfStatus::ACEPTADO, EcfStatus::ACEPTADO_CONDICIONAL])) {
+            if (in_array($mappedStatus, [EcfStatus::ACEPTADO, EcfStatus::ACEPTADO_CONDICIONAL], true)) {
                 GenerateEcfPdfJob::dispatch($this->ecf->id);
             }
 

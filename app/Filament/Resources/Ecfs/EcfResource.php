@@ -93,7 +93,8 @@ class EcfResource extends Resource
                     ->components([
                         RepeatableEntry::make('items')
                             ->label('')
-                            ->schema(fn (Schema $schema): Schema => $schema
+                            ->schema(
+                                fn (Schema $schema): Schema => $schema
                                 ->components([
                                     Grid::make(5)
                                         ->components([

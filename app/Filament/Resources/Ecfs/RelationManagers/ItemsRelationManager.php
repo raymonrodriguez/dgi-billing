@@ -9,7 +9,6 @@ use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Grid;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -31,7 +30,7 @@ class ItemsRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
-                
+
                 Grid::make(3)->components([
                     TextInput::make('quantity')
                         ->label('Cantidad')
@@ -40,7 +39,7 @@ class ItemsRelationManager extends RelationManager
                         ->default(1)
                         ->live(onBlur: true)
                         ->afterStateUpdated(fn ($state, $set, $get) => $set('subtotal', ($state * $get('price')) - $get('discount'))),
-                    
+
                     TextInput::make('price')
                         ->label('Precio Unitario')
                         ->required()
@@ -48,7 +47,7 @@ class ItemsRelationManager extends RelationManager
                         ->prefix('RD$')
                         ->live(onBlur: true)
                         ->afterStateUpdated(fn ($state, $set, $get) => $set('subtotal', ($state * $get('quantity')) - $get('discount'))),
-                    
+
                     TextInput::make('discount')
                         ->label('Descuento')
                         ->numeric()

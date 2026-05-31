@@ -27,7 +27,7 @@ class ReceivedEcfForm
                                         ->label('RNC Suplidor')
                                         ->prefixIcon('heroicon-m-building-office')
                                         ->disabled(),
-                                    
+
                                     TextInput::make('encf')
                                         ->label('e-NCF')
                                         ->prefixIcon('heroicon-m-hashtag')

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 // Módulo de Receptor Electrónico (Webhooks para Suplidores y DGII)
 Route::prefix('fe')->group(function () {
-    
+
     // Recepción de e-CF (Suplidores envían aquí)
     Route::post('/recepcion/api/ecf', [DgiiReceptionController::class, 'receiveEcf'])
         ->name('api.ecf.receive');

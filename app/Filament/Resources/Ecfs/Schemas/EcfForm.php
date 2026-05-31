@@ -33,7 +33,7 @@ class EcfForm
                                 ->preload()
                                 ->prefixIcon('heroicon-m-user')
                                 ->columnSpan(2),
-                            
+
                             TextInput::make('encf')
                                 ->label('e-NCF')
                                 ->required()
@@ -71,7 +71,7 @@ class EcfForm
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpanFull(),
-                                
+
                                 Grid::make(3)->schema([
                                     TextInput::make('quantity')
                                         ->label('Cantidad')
@@ -80,7 +80,7 @@ class EcfForm
                                         ->default(1)
                                         ->live(onBlur: true)
                                         ->afterStateUpdated(fn ($state, $set, $get) => self::calculateItemSubtotal($set, $get)),
-                                    
+
                                     TextInput::make('price')
                                         ->label('Precio Unitario')
                                         ->required()
@@ -88,7 +88,7 @@ class EcfForm
                                         ->prefix('RD$')
                                         ->live(onBlur: true)
                                         ->afterStateUpdated(fn ($state, $set, $get) => self::calculateItemSubtotal($set, $get)),
-                                    
+
                                     TextInput::make('subtotal')
                                         ->label('Subtotal')
                                         ->required()
@@ -130,7 +130,7 @@ class EcfForm
                                 ->numeric()
                                 ->prefix('RD$')
                                 ->prefixIcon('heroicon-m-banknotes'),
-                            
+
                             TextInput::make('total_tax')
                                 ->label('Total ITBIS')
                                 ->required()
@@ -154,7 +154,7 @@ class EcfForm
                                 ->prefixIcon('heroicon-m-calendar-days')
                                 ->native(false)
                                 ->displayFormat('d/m/Y H:i'),
-                            
+
                             TextInput::make('track_id')
                                 ->label('Track ID')
                                 ->placeholder('Generado al enviar')
@@ -181,7 +181,7 @@ class EcfForm
         foreach ($items as $item) {
             $subtotal = (float) ($item['subtotal'] ?? 0);
             $totalAmount += $subtotal;
-            
+
             if (($item['billing_indicator'] ?? '1') === '1') {
                 $totalTax += round($subtotal * 0.18 / 1.18, 2);
             }

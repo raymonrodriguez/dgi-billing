@@ -14,14 +14,18 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class GenerateEcfPdfJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
      */
     public function __construct(
         public int $ecfId
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -33,20 +37,15 @@ class GenerateEcfPdfJob implements ShouldQueue
         if (!$ecf) {
             return;
         }
-
-        // 1. Construir la URL del Código QR según las reglas de la DGII
         $qrUrl = $this->buildQrUrl($ecf);
 
-        // 2. Generar el Código QR en base64
         $qrCodeBase64 = base64_encode(QrCode::format('png')->size(150)->margin(0)->generate($qrUrl));
 
-        // Obtener fecha de vencimiento de la secuencia (última activa del mismo tipo)
         $sequence = \App\Models\EcfSequence::where('company_id', $ecf->company_id)
             ->where('type', $ecf->type)
             ->where('is_active', true)
             ->first();
 
-        // 3. Renderizar y generar el PDF
         $pdf = Pdf::loadView('pdf.ecf', [
             'ecf' => $ecf,
             'company' => $ecf->company,
@@ -55,8 +54,6 @@ class GenerateEcfPdfJob implements ShouldQueue
             'qrCode' => $qrCodeBase64,
             'sequenceExpiration' => $sequence?->expiration_date,
         ]);
-
-        // 4. Guardar en storage y actualizar pdf_path
         $directory = "pdfs/{$ecf->company_id}";
         $fileName = "{$ecf->encf}.pdf";
         $filePath = "{$directory}/{$fileName}";
@@ -75,7 +72,7 @@ class GenerateEcfPdfJob implements ShouldQueue
     {
         $company = $ecf->company;
         $env = $company->environment;
-        
+
         // Determinar si es RFCE (Resumen de Factura de Consumo)
         $isRfce = ($ecf->type === '32' && $ecf->total_amount < 250000);
 

@@ -4,10 +4,10 @@ namespace App\Services\DGII;
 
 use App\Repositories\Contracts\EcfRepositoryInterface;
 use App\Enums\EcfStatus;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Http;
-use App\Enums\DgiiEnvironment;
 use Exception;
 
 class DgiiEmissionService
@@ -16,10 +16,12 @@ class DgiiEmissionService
         protected EcfRepositoryInterface $ecfRepo,
         protected DgiiAuthService $authService,
         protected EcfSigningService $signingService
-    ) {}
+    ) {
+    }
 
     /**
      * Procesa, transforma, firma y emite un e-CF hacia los Web Services de la DGII.
+     * @throws ConnectionException
      */
     public function emit(int $ecfId): array
     {
@@ -33,12 +35,12 @@ class DgiiEmissionService
             $token = $this->authService->getToken();
 
             // 2. Renderizar la plantilla XML correspondiente según el tipo de e-CF (Blade template)
-            // Usamos nuestra vista estandarizada resources/views/xml/acecf.blade.php o similar
-            // Para este ejemplo, buscamos una genérica ecf_{tipo}
-            $viewName = "xml.ecf_" . $ecf->type; 
+            // Usamos nuestra vista estandarizada resources/views/xml/acecf/xml.blade.php o similar
+            // Para este ejemplo, buscamos una genérica invoices/ecf_{tipo}
+            $viewName = "xml.invoices.ecf_" . $ecf->type;
             if (!View::exists($viewName)) {
                 // TODO: Crear plantillas para cada tipo o usar una base
-                $viewName = "xml.acecf"; 
+                $viewName = "xml.approvals.xml";
             }
 
             $rawXml = View::make($viewName, ['ecf' => $ecf])->render();
@@ -59,11 +61,11 @@ class DgiiEmissionService
 
             // 5. Enviar el XML a la DGII mediante la API de Recepción
             $environment = $company->environment;
-            
+
             // Determinar endpoint correcto según tipo
-            $endpoint = "{$environment->url()}/api/recepcion/ecf"; 
+            $endpoint = "{$environment->url()}/api/recepcion/ecf";
             if ($ecf->type === '32' && $ecf->total_amount < 250000) {
-                $endpoint = "{$environment->url()}/api/recepcion/rfce"; 
+                $endpoint = "{$environment->url()}/api/recepcion/rfce";
             }
 
             $response = Http::withToken($token)
@@ -79,9 +81,9 @@ class DgiiEmissionService
             if ($response->successful()) {
                 $responseData = $response->json();
                 $trackId = $responseData['trackId'] ?? null;
-                
+
                 $this->ecfRepo->updateStatus($ecf, EcfStatus::ENVIADO, $trackId);
-                
+
                 return [
                     'success' => true,
                     'trackId' => $trackId,

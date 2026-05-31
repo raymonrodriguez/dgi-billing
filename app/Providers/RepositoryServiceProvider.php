@@ -3,12 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-
 // Contratos
 use App\Repositories\Contracts\CompanyRepositoryInterface;
 use App\Repositories\Contracts\DgiiTokenRepositoryInterface;
 use App\Repositories\Contracts\EcfRepositoryInterface;
-
 // Implementaciones Eloquent
 use App\Repositories\Eloquent\CompanyRepository;
 use App\Repositories\Eloquent\DgiiTokenRepository;

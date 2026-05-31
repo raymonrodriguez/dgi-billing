@@ -11,7 +11,9 @@ class EcfSequenceSeeder extends Seeder
     {
         $company = Company::first();
 
-        if (!$company) return;
+        if (!$company) {
+            return;
+        }
 
         $sequences = [
             [

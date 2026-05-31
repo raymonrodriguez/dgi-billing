@@ -13,14 +13,19 @@ use Exception;
 
 class SendEcfToDgiiJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Número de reintentos automáticos del Job si falla por timeouts del servidor fiscal.
      */
     public $tries = 3;
 
-    public function __construct(protected int $ecfId) {}
+    public function __construct(protected int $ecfId)
+    {
+    }
 
     public function handle(DgiiEmissionService $emissionService): void
     {

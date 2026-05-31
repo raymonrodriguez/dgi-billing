@@ -13,7 +13,7 @@ class CompanyProfile extends EditTenantProfile
     {
         return 'Perfil de la Empresa';
     }
-    
+
     public function getTitle(): string | Htmlable
     {
         return 'Perfil de la Empresa';

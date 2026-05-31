@@ -44,7 +44,7 @@ class EcfSequenceForm
                                         ->required()
                                         ->numeric()
                                         ->prefixIcon('heroicon-m-arrow-right-start-on-rectangle'),
-                                    
+
                                     TextInput::make('end_range')
                                         ->label('e-NCF Hasta')
                                         ->required()

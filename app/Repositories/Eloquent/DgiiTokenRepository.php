@@ -12,8 +12,8 @@ class DgiiTokenRepository implements DgiiTokenRepositoryInterface
     public function getValidToken(string $taxId): ?string
     {
         $token = DgiiToken::whereHas('company', function ($query) use ($taxId) {
-                $query->where('tax_id', $taxId);
-            })
+            $query->where('tax_id', $taxId);
+        })
             ->where('expires_at', '>', Carbon::now()->addMinutes(2))
             ->orderBy('created_at', 'desc')
             ->first();

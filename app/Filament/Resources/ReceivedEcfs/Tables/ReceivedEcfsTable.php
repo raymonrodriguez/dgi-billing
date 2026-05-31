@@ -70,7 +70,7 @@ class ReceivedEcfsTable
                             ->success()
                             ->send();
                     }),
-                
+
                 Action::make('reject')
                     ->label('Rechazar Comercial')
                     ->icon('heroicon-o-x-circle')
@@ -85,7 +85,7 @@ class ReceivedEcfsTable
                             ->warning()
                             ->send();
                     }),
-                
+
                 ViewAction::make(),
             ])
             ->toolbarActions([

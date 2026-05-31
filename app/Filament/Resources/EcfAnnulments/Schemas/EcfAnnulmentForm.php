@@ -34,14 +34,14 @@ class EcfAnnulmentForm
                                     ])
                                     ->required()
                                     ->prefixIcon('heroicon-m-tag'),
-                                
+
                                 Grid::make(3)->schema([
                                     TextInput::make('start_sequence')
                                         ->label('e-NCF Desde')
                                         ->required()
                                         ->numeric()
                                         ->prefixIcon('heroicon-m-arrow-right-start-on-rectangle'),
-                                    
+
                                     TextInput::make('end_sequence')
                                         ->label('e-NCF Hasta')
                                         ->required()
@@ -72,7 +72,7 @@ class EcfAnnulmentForm
                                     ->inline()
                                     ->grouped()
                                     ->disabled(),
-                                
+
                                 TextInput::make('xml_path')
                                     ->label('Ruta XML')
                                     ->disabled()

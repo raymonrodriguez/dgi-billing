@@ -13,7 +13,7 @@ class EcfSigningService
     public function signXml(string $xmlContent, string $p12Path, string $password): string
     {
         if (!file_exists($p12Path)) {
-            throw new Exception("Archivo de certificado digital no encontrado en la ruta indicada.");
+            throw new \RuntimeException("Archivo de certificado digital no encontrado en la ruta indicada.");
         }
 
         $p12Cert = file_get_contents($p12Path);
@@ -31,7 +31,6 @@ class EcfSigningService
         $doc->formatOutput = false;
         $doc->loadXML($xmlContent);
 
-        // Lógica nativa de firma o envoltura XMLDSIG (RSA-SHA256)
         return $this->executeXmlDsig($doc, $privateKey, $publicKey);
     }
 
@@ -39,6 +38,6 @@ class EcfSigningService
     {
         // En un escenario real, aquí se inyectaría la firma XMLDSIG.
         // Por ahora retornamos el XML base según la plantilla.
-        return $doc->saveXML(); 
+        return $doc->saveXML();
     }
 }

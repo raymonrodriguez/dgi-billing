@@ -45,11 +45,11 @@ class DgiiReceptionController extends Controller
             $certPassword = $company->cert_password;
 
             $xmlFirmado = Dgii::renderAcknowledgment(
-                $certContent, 
-                $certPassword, 
-                $rncEmisor, 
-                $rncComprador, 
-                $encf, 
+                $certContent,
+                $certPassword,
+                $rncEmisor,
+                $rncComprador,
+                $encf,
                 '0'
             );
 
@@ -84,10 +84,12 @@ class DgiiReceptionController extends Controller
 
         try {
             $xml = simplexml_load_string($xmlContent);
-            if (!$xml) return response()->json(['error' => 'XML inválido'], 400);
+            if (!$xml) {
+                return response()->json(['error' => 'XML inválido'], 400);
+            }
 
-            $encf = (string) ($xml->AprobacionComercial->eNCF ?? ''); 
-            $rawStatus = (string) ($xml->AprobacionComercial->Estado ?? '1'); 
+            $encf = (string) ($xml->AprobacionComercial->eNCF ?? '');
+            $rawStatus = (string) ($xml->AprobacionComercial->Estado ?? '1');
             $status = ($rawStatus === '1') ? CommercialApprovalStatus::APROBADO : CommercialApprovalStatus::RECHAZADO;
 
             $ecf = Ecf::where('encf', $encf)->first();

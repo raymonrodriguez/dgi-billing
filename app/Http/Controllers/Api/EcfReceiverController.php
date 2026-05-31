@@ -26,7 +26,7 @@ class EcfReceiverController extends Controller
             // 1. Parsear XML básico para identificar al receptor y emisor
             // Usamos simplexml para una lectura rápida
             $xml = simplexml_load_string($xmlContent);
-            
+
             // Estructura DGII: Encabezado -> Receptor -> RNCReceptor
             $rncReceptor = (string) ($xml->Encabezado->Receptor->RNCReceptor ?? '');
             $rncEmisor = (string) ($xml->Encabezado->Emisor->RNCEmisor ?? '');

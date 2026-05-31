@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Enums\EcfStatus;
 use App\Models\Ecf;
 use Filament\Facades\Filament;
-use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseTableWidget;
 use Filament\Tables\Columns\TextColumn;
@@ -14,7 +13,7 @@ use Filament\Actions\ViewAction;
 class RecentInvoicesWidget extends BaseTableWidget
 {
     protected static ?string $heading = 'Últimas Facturas Emitidas';
-    
+
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table

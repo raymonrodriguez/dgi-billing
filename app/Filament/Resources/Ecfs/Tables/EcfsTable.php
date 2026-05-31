@@ -60,14 +60,15 @@ class EcfsTable
                     ->color('info')
                     ->visible(fn (Ecf $record) => filled($record->pdf_path))
                     ->action(fn (Ecf $record) => Storage::disk('public')->download($record->pdf_path)),
-                
+
                 Action::make('viewErrors')
                     ->label('Ver Errores DGII')
                     ->icon('heroicon-o-exclamation-circle')
                     ->color('danger')
                     ->visible(fn (Ecf $record) => $record->dgii_status === EcfStatus::RECHAZADO && filled($record->dgii_messages))
                     ->modalHeading('Mensajes de la DGII')
-                    ->infolist(fn (Ecf $record) => \Filament\Infolists\Infolist::make()
+                    ->infolist(
+                        fn (Ecf $record) => \Filament\Infolists\Infolist::make()
                         ->schema([
                             \Filament\Infolists\Components\TextEntry::make('dgii_messages')
                                 ->label('Detalle del Error')

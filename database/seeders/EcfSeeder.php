@@ -11,7 +11,9 @@ class EcfSeeder extends Seeder
     public function run(): void
     {
         $company = Company::first();
-        if (!$company) return;
+        if (!$company) {
+            return;
+        }
 
         $contact = $company->contacts()->where('is_electronic_receiver', true)->first();
         $finalConsumer = $company->contacts()->where('is_electronic_receiver', false)->first();

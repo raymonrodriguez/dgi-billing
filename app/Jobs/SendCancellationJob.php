@@ -15,14 +15,18 @@ use PlatinumPlace\LaravelDgii\Facades\Dgii;
 
 class SendCancellationJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
      */
     public function __construct(
         public EcfAnnulment $annulment
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.

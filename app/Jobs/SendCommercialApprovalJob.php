@@ -16,7 +16,10 @@ use PlatinumPlace\LaravelDgii\Facades\Dgii;
 
 class SendCommercialApprovalJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
@@ -24,7 +27,8 @@ class SendCommercialApprovalJob implements ShouldQueue
     public function __construct(
         public int $receivedEcfId,
         public string $status // '1' para Aceptado, '2' para Rechazado
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the job.
@@ -33,7 +37,9 @@ class SendCommercialApprovalJob implements ShouldQueue
     {
         $receivedEcf = ReceivedEcf::with('company')->find($this->receivedEcfId);
 
-        if (!$receivedEcf) return;
+        if (!$receivedEcf) {
+            return;
+        }
 
         $company = $receivedEcf->company;
 
@@ -46,7 +52,7 @@ class SendCommercialApprovalJob implements ShouldQueue
             $certPassword = $company->cert_password;
 
             // 3. Construir XML de Aprobación Comercial (ACECF)
-            $xmlContent = View::make('xml.acecf', [
+            $xmlContent = View::make('xml.approvals.xml', [
                 'rncEmisor' => $receivedEcf->rnc_emisor,
                 'rncReceptor' => $company->tax_id,
                 'encf' => $receivedEcf->encf,

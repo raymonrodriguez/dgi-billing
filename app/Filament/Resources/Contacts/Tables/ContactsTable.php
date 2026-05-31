@@ -63,7 +63,7 @@ class ContactsTable
                         'rnc' => 'RNC',
                         'cedula' => 'Cédula',
                     ]),
-                
+
                 Filter::make('is_electronic_receiver')
                     ->label('Solo Receptores Electrónicos')
                     ->toggle()

@@ -57,7 +57,7 @@ class ContactForm
                                             ->label('Correo Electrónico')
                                             ->email()
                                             ->prefixIcon('heroicon-m-envelope'),
-                                        
+
                                         TextInput::make('phone')
                                             ->label('Teléfono')
                                             ->tel()
@@ -82,7 +82,7 @@ class ContactForm
                                     ->onIcon('heroicon-m-bolt')
                                     ->offIcon('heroicon-m-x-mark')
                                     ->columnSpanFull(),
-                                
+
                                 Toggle::make('is_active')
                                     ->label('Contacto Activo')
                                     ->helperText('Un contacto inactivo no se mostrará en los selectores.')

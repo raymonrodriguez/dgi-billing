@@ -16,11 +16,11 @@ class EcfRepository implements EcfRepositoryInterface
     public function updateStatus(Ecf $ecf, EcfStatus $status, ?string $trackId = null, ?string $xmlPath = null): bool
     {
         $data = ['dgii_status' => $status];
-        
+
         if ($trackId) {
             $data['track_id'] = $trackId;
         }
-        
+
         if ($xmlPath) {
             $data['signed_xml_path'] = $xmlPath;
         }

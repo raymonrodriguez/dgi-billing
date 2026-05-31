@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-
 use App\Enums\DgiiEnvironment;
 
 class CompanySeeder extends Seeder
